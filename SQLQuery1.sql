@@ -278,3 +278,194 @@ group by Location
 
 --rida 257
 -- 4 tund
+
+select * from Employees
+select SUM(cast(Salary as int)) from Employees
+
+--lisame veeru City ja pikkus on 30
+
+alter table Employees
+add City nvarchar(30)
+
+select City, Gender, SUM(cast(Salary as int)) as TotalSalary
+from Employees
+group by City, Gender
+
+--peaaegu sama p‰ring, aga linnad on t‰hestikulises j‰rjestuses
+select City, Gender, SUM(cast(Salary as int)) as TotalSalary
+from Employees
+group by City, Gender order by City
+
+--on vaja teada, etmitu inimest on nimekirjas
+
+Select COUNT(*) From Employees
+
+--mitu tˆˆtajat on soo ja linna kaupa tˆˆtamas
+select City, Gender, SUM(cast(Salary as int)) as TotalSalary,
+COUNT(Id) as [Total Employee(s)]
+from Employees
+group by Gender, City
+
+--kuvab kas naised vıi mehed linnade kaupa
+--kasutage where
+
+select City, Gender, SUM(cast(Salary as int)) as TotalSalary,
+COUNT(Id) as [Total Employee(s)]
+from Employees
+Where Gender = 'Male'
+group by Gender, City
+
+--sama tulemus nagu eelmine, aga kasutame having
+
+select City, Gender, SUM(cast(Salary as int)) as TotalSalary,
+COUNT(Id) as [Total Employee(s)]
+from Employees
+group by Gender, City
+Having Gender = 'Male'
+
+--kıik kes teenivad rohkem kui 4000 (variandis peab error tulema)
+select * from Employees
+where SUM(cast(Salary as int)) > 4000
+
+--teeme variandi, kus saame tulemuse
+select  Gender, City, SUM(cast(Salary as int)) as TotalSalary,
+COUNT(Id) as [Total Employee(s)]
+from Employees
+group by Gender, City
+having SUM(CAST(salary as int)) > 4000
+
+--loome tabeli, milles hakatakse automaatselt nummerdama Id-d
+create table Test1
+(
+Id int identity(1,1),
+Value nvarchar(20)
+)
+
+insert into Test1 values('X')
+select * from Test1
+
+--kustutame veeru nimega City Employees tabelist
+alter table Emloyees 
+drop column City
+
+--inner join
+--kuvab neid, kellel on DepartmentName al olemas v‰‰rtus
+--mitte kattuvad read eemaldtakse tulemusest
+--ja sellep‰rast ei n‰idata Jamesi ja Russelit tabelis
+--kuna neil on DepartmentId NULL
+select Name, Gender, Salary, DepartmentName
+from Employees
+inner join Department 
+on Employees.DepartmentId = Department.Id
+
+--left join
+select Name, Gender, Salary, DepartmentName
+from Employees
+left join Department --vıib kasutada ka LEFT OUTER JOIN-i
+on Employees.DepartmentId = Department.Id
+--uurige, mis on left join
+--n‰itab andmeid, kus vasakpoolsest tabelist isegi, siis kui sela puudub
+--mınes reas v‰‰rtus
+
+--right join
+select Name, Gender, Salary, DepartmentName
+from Employees
+right join Department --vıib kasutada ka RIGHT OUTER JOIN-i
+on Employees.DepartmentId = Department.Id
+--right join n‰itab paremas (Department) tabelis olevaid v‰‰rtuseid,
+--mis ei ¸hti vasaku (Employees) tabeliga
+
+--outer join
+select Name, Gender, Salary, DepartmentName
+from Employees
+full outer join Department 
+on Employees.DepartmentId = Department.Id
+--mılema tabeli read kuvab
+
+--teha croos join
+select Name, Gender, Salary, DepartmentName
+from Employees
+cross join Department 
+--korrutab kıik omavahel l‰bi
+
+--teha left join, kus Employees tabelist Department on null
+select Name, Gender, Salary, DepartmentName
+from Employees
+left join Department 
+on Employees.DepartmentId = Department.Id
+where Employees.DepartmentId is NULL
+
+--teine variant ja sama tulemus
+select Name, Gender, Salary, DepartmentName
+from Employees
+left join Department 
+on Employees.DepartmentId = Department.Id
+where Department.Id is NULL
+--n‰itab ainult neid, kellel on vasakus tabelis (Employees)
+--DepartmentId null
+
+select Name, Gender, Salary, DepartmentName
+from Employees
+right join Department 
+on Employees.DepartmentId = Department.Id
+where Employees.DepartmentId is NULL
+--n‰itab ainult paremas tabelis olevat rida, 
+--mis ei kattu Employees-ga.
+
+--full join
+--mılema tabeli mitte-kattuvate v‰‰rtustega read kuvab v‰lja
+select Name, Gender, Salary, DepartmentName
+from Employees
+full join Department 
+on Employees.DepartmentId = Department.Id
+where Employees.DepartmentId is NULL
+or Department.Id is null
+
+--teete ArventureWorksLT2019 andmebaasile join p‰ringuid:
+--inner join, left join, right join, cross join ja full join
+--tabeleid sellesse andmebaasi juurde ei tohi teha
+
+USE AdventureWorksLT2019
+select NameStyle, Title, FirstName
+from SalesLT.Customer
+cross join SalesLT.CustomerAddress
+
+USE AdventureWorksLT2019
+select NameStyle, Title, FirstName
+from SalesLT.Customer
+inner join SalesLT.CustomerAddress
+on SalesLT.CustomerAddress.CustomerId = SalesLT.Customer.CustomerId
+
+USE AdventureWorksLT2019
+select NameStyle, Title, FirstName
+from SalesLT.Customer
+left join SalesLT.CustomerAddress
+on SalesLT.CustomerAddress.CustomerId = SalesLT.Customer.CustomerId
+
+USE AdventureWorksLT2019
+select NameStyle, Title, FirstName
+from SalesLT.Customer
+right join SalesLT.CustomerAddress
+on SalesLT.CustomerAddress.CustomerId = SalesLT.Customer.CustomerId
+
+USE AdventureWorksLT2019
+select NameStyle, Title, FirstName
+from SalesLT.Customer
+full join SalesLT.CustomerAddress
+on SalesLT.CustomerAddress.CustomerId = SalesLT.Customer.CustomerId
+where SalesLT.CustomerAddress.CustomerId is NULL
+or SalesLT.customer.CustomerId is NULL
+
+--Mınikord peab muutuja ette kirjutama tabeli nimetuse nagu on Prodyct.Name,
+--et editor saaks aru, et kumma tabeli muutujat soovitatakse kasutada ja ei tekiks
+--segadust 
+select Product.Name as [Product Name], ProductNumber, ListPrice,
+ProductModel.Name as [Product Model Name],
+Product.productModelId, ProductModel.ProductModelId
+--mınikord peab ka tabeli ette kirjutama t‰psustuse info
+--nagu on SalesLT.Product
+from SalesLT.Product
+inner join SalesLT.ProductModel
+--antud juhul Producti tabelis ProductModelId vıırvıti,
+--mis ProdustModeli tabelis on primaatvıti
+on Product.ProductModelId = ProductModel.ProductModelId
