@@ -469,3 +469,42 @@ inner join SalesLT.ProductModel
 --antud juhul Producti tabelis ProductModelId võõrvõti,
 --mis ProdustModeli tabelis on primaatvõti
 on Product.ProductModelId = ProductModel.ProductModelId
+
+select isnull('Ingvar', 'No Manager') as Manager
+
+--NULL asemel kuvab No Manager
+select coalesce(NULL, 'No Manager') as Manager
+
+alter table Employees 
+add ManagerId int
+
+--neile, kelle ei ole ülemust, siis paneb No Manager teksti
+--kasutage left joini
+select E.Name as Employee, isnull(M.Name, 'No Manager') as Manager
+from Employees E
+left join Employees M
+on E.ManagerId = M.Id
+
+--kasutame inner joini
+--kuvab ainult ManagerId all olevate isikute väärtused
+select E.Name as Employee, isnull(M.Name, 'No Manager') as Manager
+from Employees E
+inner join Employees M
+on E.ManagerId = M.Id
+
+--kõik saavad kõikide ülemused olla
+select E.Name as Employee, isnull(M.Name, 'No Manager') as Manager
+from Employees E
+cross join Employees M
+
+--lisame Employees tabelisse uued veerud
+alter table Employees
+add MiddleName nvarchar (30)
+
+alter table Employees
+add LastName nvarchar (30) 
+
+select * from Employees 
+
+--muudame olemasoleva veeru nimetust
+sp_rename 'Employees.Name', 'FirstName'
